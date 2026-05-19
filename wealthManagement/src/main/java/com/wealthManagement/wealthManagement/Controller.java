@@ -7,6 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class Controller {
     @GetMapping("/health")
     public String health() {
-        return "Wealth Management Service is running 🚀";
+        return "Wealth Management Service is running 🚀 let's get rich together!";
     }
 }
