@@ -13,8 +13,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Full history for SonarQube analysis
     
     - name: Set up JDK 17
       uses: actions/setup-java@v3
@@ -33,15 +31,17 @@ jobs:
         cd wealthManagement
         mvn test
     
-    - name: Run Code Quality Analysis with SonarCloud
+    - name: Run Code Analysis - Checkstyle
       run: |
         cd wealthManagement
-        mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-          -Dsonar.projectKey=wealth-tracker-backend \
-          -Dsonar.projectName="Wealth Tracker Backend" \
-          -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
-          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        mvn checkstyle:check
+      continue-on-error: true
+    
+    - name: Generate Test Report
+      if: always()
+      run: |
+        cd wealthManagement
+        mvn surefire-report:report
       continue-on-error: true
     
     - name: Archive Build Results
@@ -52,4 +52,12 @@ jobs:
         path: |
           wealthManagement/target/
           wealthManagement/target/surefire-reports/
+        retention-days: 30
+    
+    - name: Archive Test Reports
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-reports
+        path: wealthManagement/target/site/
         retention-days: 30
