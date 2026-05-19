@@ -1,0 +1,55 @@
+name: Build and Code Quality Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for SonarQube analysis
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Build with Maven
+      run: |
+        cd wealthManagement
+        mvn clean package -DskipTests
+    
+    - name: Run Tests
+      run: |
+        cd wealthManagement
+        mvn test
+    
+    - name: Run Code Quality Analysis with SonarCloud
+      run: |
+        cd wealthManagement
+        mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.projectKey=wealth-tracker-backend \
+          -Dsonar.projectName="Wealth Tracker Backend" \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }} \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      continue-on-error: true
+    
+    - name: Archive Build Results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-results
+        path: |
+          wealthManagement/target/
+          wealthManagement/target/surefire-reports/
+        retention-days: 30
