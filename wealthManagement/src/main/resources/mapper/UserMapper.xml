@@ -1,22 +1,44 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.wealthManagement.wealthManagement.mybatis.mapper.UserMapper">
 
-    <!-- Explicit resultMap to map DB columns to POJO properties -->
-    <resultMap id="SampleResponseMap" type="com.wealthManagement.wealthManagement.pojo.responseBody.UserDetailMapper">
-        <result property="userId" column="id" />
-        <result property="name" column="full_name" />
-        <result property="email" column="email" />
-        <result property="mobileNumber" column="mobile_number" />
-        <result property="createdAt" column="created_at" />
-        <result property="updatedAt" column="updated_at" />
+    <resultMap id="UserDtoMap" type="com.wealthManagement.wealthManagement.pojo.dto.UserDto">
+        <id     property="id"           column="id"/>
+        <result property="fullName"     column="full_name"/>
+        <result property="email"        column="email"/>
+        <result property="mobileNumber" column="mobile_number"/>
+        <result property="pan"          column="pan"/>
     </resultMap>
 
-    <select id="selectOne" resultMap="SampleResponseMap">
-        SELECT 
-            id,full_name,email,mobile_number,created_at,updated_at
-        FROM m_user
+    <!-- ── Insert ──────────────────────────────────────────────────── -->
+    <insert id="insertUser"
+            parameterType="com.wealthManagement.wealthManagement.pojo.dto.UserDto"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO m_user (full_name, email, mobile_number, pan)
+        VALUES (#{fullName}, #{email}, #{mobileNumber}, #{pan})
+    </insert>
+
+    <!-- ── Lookup by PAN ───────────────────────────────────────────── -->
+    <select id="selectUserByPan" resultMap="UserDtoMap">
+        SELECT * FROM m_user
+        WHERE pan = #{pan}
+            LIMIT 1
     </select>
 
+    <!-- ── Lookup by email (PAN-null fallback) ─────────────────────── -->
+    <select id="selectUserByEmail" resultMap="UserDtoMap">
+        SELECT * FROM m_user
+        WHERE email = #{email}
+            LIMIT 1
+    </select>
+
+    <!-- ── All users ───────────────────────────────────────────────── -->
+    <select id="selectOne"
+            resultType="com.wealthManagement.wealthManagement.pojo.responseBody.UserDetailMapper">
+        SELECT id, full_name AS fullName, email, mobile_number AS mobileNumber, pan
+        FROM m_user
+    </select>
 
 </mapper>

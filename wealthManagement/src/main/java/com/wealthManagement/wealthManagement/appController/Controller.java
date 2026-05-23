@@ -1,11 +1,16 @@
 package com.wealthManagement.wealthManagement.appController;
 
 import com.wealthManagement.wealthManagement.orchestrator.factory.OrchestratorFactory;
+import com.wealthManagement.wealthManagement.pojo.requestBody.TransactionDataRequest;
 import com.wealthManagement.wealthManagement.pojo.responseBody.AssetDetailMapper;
 import com.wealthManagement.wealthManagement.pojo.responseBody.UserDetailMapper;
 import org.springframework.web.bind.annotation.*;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
+
+import static reactor.netty.http.HttpConnectionLiveness.log;
 
 @RestController
 @RequestMapping("/api")
@@ -36,6 +41,13 @@ public class Controller {
         return orchestratorFactory
                 .getUserOrchestrator()
                 .getAllUsers();
+    }
+
+    @PostMapping("/addTransactionDetails")
+    public List<TransactionDataRequest> casDataLoader(@RequestBody List<TransactionDataRequest> transaction) {
+        return orchestratorFactory
+                .getTransactionOrchestrator()
+                .addTransaction(transaction);
     }
 
 }

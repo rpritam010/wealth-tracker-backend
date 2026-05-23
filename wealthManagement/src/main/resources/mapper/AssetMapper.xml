@@ -1,41 +1,79 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
 <mapper namespace="com.wealthManagement.wealthManagement.mybatis.mapper.AssetMapper">
 
-    <!-- Explicit resultMap to map DB columns to POJO properties -->
-    <resultMap id="SampleResponseMap" type="com.wealthManagement.wealthManagement.pojo.responseBody.AssetDetailMapper">
-        <result property="assetName" column="asset_name" />
-        <result property="assetCode" column="asset_code" />
-        <result property="issuerName" column="issuer_name" />
-        <result property="assetSubType" column="asset_subType" />
-        <result property="folioNumber" column="folio_number" />
-        <result property="assetTypeCode" column="asset_type_code" />
+    <!-- ── Result map ──────────────────────────────────────────────── -->
+    <resultMap id="AssetDtoMap" type="com.wealthManagement.wealthManagement.pojo.dto.AssetDto">
+        <id     property="id"           column="id"/>
+        <result property="assetName"    column="asset_name"/>
+        <result property="assetCode"    column="asset_code"/>
+        <result property="assetTypeId"  column="asset_type_id"/>
+        <result property="sectorId"     column="sector_id"/>
+        <result property="geographyId"  column="geography_id"/>
+        <result property="currencyCode" column="currency_code"/>
+        <result property="issuerName"   column="issuer_name"/>
+        <result property="assetSubType" column="asset_subtype"/>
+        <result property="folioNumber"  column="folio_number"/>
+        <result property="userId"       column="user_id"/>
+        <result property="remarks"      column="remarks"/>
+        <result property="createdAt"    column="created_at"/>
+        <result property="updatedAt"    column="updated_at"/>
     </resultMap>
 
-    <select id="selectOne" resultMap="SampleResponseMap">
-        SELECT 
-            a.asset_name,
-            a.asset_code,
-            a.issuer_name,
-            a.asset_subType,
-            a.folio_number,
-            b.asset_type_code
-        FROM m_asset a
-        JOIN c_asset_type b ON a.asset_type_id = b.id
+    <!-- ── Insert ──────────────────────────────────────────────────── -->
+    <insert id="insertAsset"
+            parameterType="com.wealthManagement.wealthManagement.pojo.dto.AssetDto"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO m_asset (
+            asset_name, asset_code, asset_type_id,
+            issuer_name, asset_subtype,
+            folio_number, user_id, remarks
+        ) VALUES (
+                     #{assetName}, #{assetCode}, #{assetTypeId},
+                     #{issuerName}, #{assetSubType},
+                     #{folioNumber}, #{userId}, #{remarks}
+                 )
+    </insert>
+
+    <!-- ── Get by folio + user (legacy) ───────────────────────────── -->
+    <select id="getAssetByFolio" resultMap="AssetDtoMap">
+        SELECT * FROM m_asset
+        WHERE folio_number = #{folioNumber}
+          AND user_id      = #{userId}
+            LIMIT 1
     </select>
 
-    <!-- Return all assets for a specific user -->
-    <select id="selectAssetsByUserId" parameterType="long" resultMap="SampleResponseMap">
-        SELECT 
-            a.asset_name,
-            a.asset_code,
-            a.issuer_name,
-            a.asset_subType,
-            a.folio_number,
-            b.asset_type_code
+    <!-- ── Get by folio + ISIN + user (new — one row per scheme) ──── -->
+    <select id="getAssetByFolioAndIsin" resultMap="AssetDtoMap">
+        SELECT * FROM m_asset
+        WHERE folio_number = #{folioNumber}
+          AND asset_code   = #{isin}
+          AND user_id      = #{userId}
+            LIMIT 1
+    </select>
+
+    <!-- ── Select all assets for a user ───────────────────────────── -->
+    <select id="selectAssetsByUserId"
+            resultType="com.wealthManagement.wealthManagement.pojo.responseBody.AssetDetailMapper">
+        SELECT
+            a.id,
+            a.asset_name    AS assetName,
+            a.asset_code    AS assetCode,
+            a.folio_number  AS folioNumber,
+            a.issuer_name   AS issuerName,
+            a.asset_subtype AS assetSubType,
+            t.asset_type_name AS assetTypeName
         FROM m_asset a
-        JOIN c_asset_type b ON a.asset_type_id = b.id
+                 LEFT JOIN c_asset_type t ON a.asset_type_id = t.id
         WHERE a.user_id = #{userId}
+        ORDER BY a.asset_name
+    </select>
+
+    <select id="selectOne"
+            resultType="com.wealthManagement.wealthManagement.pojo.responseBody.AssetDetailMapper">
+        SELECT * FROM m_asset LIMIT 1
     </select>
 
 </mapper>

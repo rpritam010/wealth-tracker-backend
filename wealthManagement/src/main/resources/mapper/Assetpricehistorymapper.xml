@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wealthManagement.wealthManagement.mybatis.mapper.AssetPriceHistoryMapper">
+
+    <insert id="insert"
+            parameterType="com.wealthManagement.wealthManagement.pojo.dto.AssetPriceHistoryDto"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO h_asset_price_history (asset_id, price_date, price)
+        VALUES (#{assetId}, #{priceDate}, #{price})
+    </insert>
+
+    <select id="countByAssetAndDate" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM h_asset_price_history
+        WHERE asset_id   = #{assetId}
+          AND price_date = #{priceDate}
+    </select>
+
+</mapper>

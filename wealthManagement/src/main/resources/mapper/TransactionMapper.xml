@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wealthManagement.wealthManagement.mybatis.mapper.TransactionMapper">
+
+    <resultMap id="TransactionDtoMap"
+               type="com.wealthManagement.wealthManagement.pojo.dto.TransactionDto">
+        <id     property="id"                   column="id"/>
+        <result property="portfolioId"          column="portfolio_id"/>
+        <result property="assetId"              column="asset_id"/>
+        <result property="userId"               column="user_id"/>
+        <result property="folioNumber"          column="folio_number"/>
+        <result property="transactionType"      column="transaction_type"/>
+        <result property="transactionDate"      column="transaction_date"/>
+        <result property="totalAmount"          column="total_amount"/>
+        <result property="quantity"             column="quantity"/>
+        <result property="pricePerUnit"         column="price_per_unit"/>
+        <result property="navValue"             column="nav_value"/>
+        <result property="unitBalance"          column="unit_balance"/>
+        <result property="charges"              column="charges"/>
+        <result property="stampDuty"            column="stamp_duty"/>
+        <result property="interestRate"         column="interest_rate"/>
+        <result property="transactionReference" column="transaction_reference"/>
+        <result property="transactionSource"    column="transaction_source"/>
+        <result property="premiumDueDate"       column="premium_due_date"/>
+        <result property="maturityDate"         column="maturity_date"/>
+        <result property="notes"                column="notes"/>
+        <result property="createdAt"            column="created_at"/>
+    </resultMap>
+
+    <!-- ── Insert ──────────────────────────────────────────────────── -->
+    <insert id="insertTransaction"
+            parameterType="com.wealthManagement.wealthManagement.pojo.dto.TransactionDto"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_transaction (
+            portfolio_id, asset_id, user_id,
+            folio_number, transaction_type, transaction_date,
+            total_amount, quantity, price_per_unit, nav_value, unit_balance,
+            charges, stamp_duty, interest_rate,
+            transaction_reference, transaction_source,
+            premium_due_date, maturity_date,
+            notes, created_at
+        ) VALUES (
+                     #{portfolioId}, #{assetId}, #{userId},
+                     #{folioNumber}, #{transactionType}, #{transactionDate},
+                     #{totalAmount}, #{quantity}, #{pricePerUnit}, #{navValue}, #{unitBalance},
+                     #{charges}, #{stampDuty}, #{interestRate},
+                     #{transactionReference}, #{transactionSource},
+                     #{premiumDueDate}, #{maturityDate},
+                     #{notes}, #{createdAt}
+                 )
+    </insert>
+
+    <!-- ── Dedup check ─────────────────────────────────────────────── -->
+    <select id="checkTransactionExists" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM t_transaction
+        WHERE folio_number       = #{folioNumber}
+          AND transaction_date   = #{transactionDate}
+          AND transaction_type   = #{transactionType}
+          AND total_amount       = #{totalAmount}
+          AND quantity           = #{quantity}
+    </select>
+
+    <!-- ── Select by folio ─────────────────────────────────────────── -->
+    <select id="selectTransactionsByFolio" resultMap="TransactionDtoMap">
+        SELECT * FROM t_transaction
+        WHERE folio_number = #{folioNumber}
+        ORDER BY transaction_date
+    </select>
+
+</mapper>

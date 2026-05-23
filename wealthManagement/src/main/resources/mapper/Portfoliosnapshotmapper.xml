@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wealthManagement.wealthManagement.mybatis.mapper.PortfolioSnapshotMapper">
+
+    <!--
+        Requires a UNIQUE key on (portfolio_id, snapshot_date).
+        Run once in DB:
+          ALTER TABLE h_portfolio_snapshot
+            ADD UNIQUE KEY uq_portfolio_snap (portfolio_id, snapshot_date);
+    -->
+    <insert id="upsert"
+            parameterType="com.wealthManagement.wealthManagement.pojo.dto.PortfolioSnapshotDto">
+        INSERT INTO h_portfolio_snapshot (
+            portfolio_id, snapshot_date,
+            invested_amount, current_value, total_profit_loss,
+            xirr, cagr
+        ) VALUES (
+                     #{portfolioId}, #{snapshotDate},
+                     #{investedAmount}, #{currentValue}, #{totalProfitLoss},
+                     #{xirr}, #{cagr}
+                 )
+            ON DUPLICATE KEY UPDATE
+                                 invested_amount  = VALUES(invested_amount),
+                                 current_value    = VALUES(current_value),
+                                 total_profit_loss = VALUES(total_profit_loss),
+                                 xirr             = VALUES(xirr),
+                                 cagr             = VALUES(cagr)
+    </insert>
+
+</mapper>

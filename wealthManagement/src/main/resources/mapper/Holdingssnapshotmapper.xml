@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wealthManagement.wealthManagement.mybatis.mapper.HoldingsSnapshotMapper">
+
+    <!--
+        INSERT ... ON DUPLICATE KEY UPDATE
+        Requires a UNIQUE key on (portfolio_id, asset_id, snapshot_date).
+        Run once in DB:
+          ALTER TABLE h_holdings_snapshot
+            ADD UNIQUE KEY uq_holdings_snap (portfolio_id, asset_id, snapshot_date);
+    -->
+    <insert id="upsert"
+            parameterType="com.wealthManagement.wealthManagement.pojo.dto.HoldingsSnapshotDto">
+        INSERT INTO h_holdings_snapshot (
+            portfolio_id, asset_id, snapshot_date,
+            total_quantity, invested_amount,
+            current_price, current_value, profit_loss,
+            xirr, cagr
+        ) VALUES (
+                     #{portfolioId}, #{assetId}, #{snapshotDate},
+                     #{totalQuantity}, #{investedAmount},
+                     #{currentPrice}, #{currentValue}, #{profitLoss},
+                     #{xirr}, #{cagr}
+                 )
+            ON DUPLICATE KEY UPDATE
+                                 total_quantity   = VALUES(total_quantity),
+                                 invested_amount  = VALUES(invested_amount),
+                                 current_price    = VALUES(current_price),
+                                 current_value    = VALUES(current_value),
+                                 profit_loss      = VALUES(profit_loss),
+                                 xirr             = VALUES(xirr),
+                                 cagr             = VALUES(cagr)
+    </insert>
+
+</mapper>

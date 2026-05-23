@@ -3,7 +3,7 @@
 <mapper namespace="com.wealthManagement.wealthManagement.mybatis.mapper.AssetDetail">
 
     <!-- Explicit resultMap to map DB columns to POJO properties -->
-    <resultMap id="SampleResponseMap" type="com.wealthManagement.wealthManagement.pojo.responseBody.AssetDetailMapper">
+    <resultMap id="AssetResultMap" type="com.wealthManagement.wealthManagement.pojo.responseBody.AssetDetailMapper">
         <result property="assetName" column="asset_name" />
         <result property="assetCode" column="asset_code" />
         <result property="issuerName" column="issuer_name" />
@@ -12,7 +12,7 @@
         <result property="assetTypeCode" column="asset_type_code" />
     </resultMap>
 
-    <select id="selectOne" resultMap="SampleResponseMap">
+    <select id="selectOne" resultMap="AssetResultMap">
         SELECT 
             a.asset_name,
             a.asset_code,
@@ -25,7 +25,7 @@
     </select>
 
     <!-- Return all assets for a specific user -->
-    <select id="selectAssetsByUserId" parameterType="long" resultMap="SampleResponseMap">
+    <select id="selectAssetsByUserId" parameterType="long" resultMap="AssetResultMap">
         SELECT 
             a.asset_name,
             a.asset_code,
