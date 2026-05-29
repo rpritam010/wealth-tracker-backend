@@ -26,7 +26,7 @@ jobs:
         cd wealthManagement
         mvn clean package -DskipTests
     
-    name: Run Tests (Skip DB Tests)
+    - name: Run Tests (Skip DB Tests)
       run: |
         cd wealthManagement
         mvn test -DskipTests
